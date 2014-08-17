@@ -1,7 +1,7 @@
 # REPRODUCIBLE RESEARCH: Assignment 1
 ###LOADING THE DATA
 
-I downloaded the data and loaded them using R Studio. After that I checked the data format and summarized them. 
+I downloaded the data and loaded them using the R Studio. After that I checked the format of the data and summarized them. 
 
 ```r
 activity <- read.csv("~/R/Repreducible research/repdata-data-activity/activity.csv")
@@ -36,7 +36,7 @@ summary(activity)
 
 ###MEAN AND MEDIAN TOTAL NUMBER OF STEPS TAKEN PER DAY
 
-Firstly, I created new dataset that contains only complete observations from original one. Then I computed total number steps of each day using `tapply()` function. Finally, I computed mean and median total number of steps per day and plotted the histogram.
+Firstly, I created new dataset that contains only complete observations from the original one. Then I computed total number steps of each day using `tapply()` function. Finally, I computed the mean and the median total number of steps per day and plotted the histogram.
 
 ```r
 dat1<-activity[complete.cases(activity),]
@@ -72,12 +72,12 @@ legend(20000,12,"Mean",lty=1,col="red")
 ![plot of chunk unnamed-chunk-2](./assignment_1_files/figure-html/unnamed-chunk-2.png) 
 
 
-The mean is 1.0766 &times; 10<sup>4</sup> and median is 10765
+The mean is 1.0766 &times; 10<sup>4</sup> and the median is 10765
 
 
 ###AVERAGE DAILY ACTIVITY PATTERN
 
-I used the modified dataset from previous question. The function `tapply()` was used to compute average steps for each interval. Subsequently, I created time series plot showing average steps by time interval. 
+I used the modified dataset from previous question. The function `tapply()` was used to compute the  average steps for each interval. Subsequently, I created time series plot showing the average steps by time interval. 
 
 ```r
 int.mean<-tapply(dat1$step,as.factor(dat1$interval),mean)
@@ -116,7 +116,7 @@ The highest average steps are 206.1698 in interval 835.
 
 ###MISSING VALUES
 
-I decided to replace missing values by average steps of interval. As a first step, I calculated average steps for each interval. Then I converted the output to dataframe and merged it with original dataframe, matching the intervals.. After that, I easilly replaced NA with matched interval average. In the end, I computed mean, median and plotted the histogram. 
+I decided to replace missing values by the average steps of interval. As the first step, I calculated the average steps for each interval. Then I converted the output to dataframe and merged it with the original dataframe. After that, I easilly replaced NA with matching interval average. In the end, I computed mean, median and plotted the histogram. 
  
 
 ```r
@@ -166,12 +166,12 @@ legend(20000,20,"Mean",lty=1,col="red")
 
 
 In the original dataframe, there is 2304 NAs.
-After replacing NA with interval averages I computed that mean total number of steps is 1.0766 &times; 10<sup>4</sup> and median total number of steps is 1.0766 &times; 10<sup>4</sup>. This values are different than values computed from data with ommited NAs. Replacing NAs by  interval means shifted the median towards the mean. As can be seen from histogram, data are now more concetrated around the mean.  
+After replacing NA with interval averages I computed that the mean total number of steps is 1.0766 &times; 10<sup>4</sup> and the median total number of steps is 1.0766 &times; 10<sup>4</sup>. This values are different than values computed from data with ommited NAs. Replacing NAs by  interval means shifted the median towards the mean. As can be seen from histogram, data are now more concetrated around the mean.  
 
 
 ###DIFFERENCES IN ACTIVITY PATTERNS BETWEEN WEEKDAYS AND WEEKENDS
 
-I used `strptime()` function to identify days. After that, I splitted the dataset to weekend and weekday datasets. Finally, interval means were computed and graph plotted for each dataset.
+I used `strptime()` function to identify days. After that, I splitted the dataset to the  weekend and the weekday datasets. Finally, the interval means were computed and graph plotted for each dataset.
 
 
 ```r
@@ -207,4 +207,5 @@ plot(int.mean.weekday,type="l",ylab="Mean steps ",main="Weekdays",xlab="Interval
 
 ![plot of chunk unnamed-chunk-5](./assignment_1_files/figure-html/unnamed-chunk-52.png) 
 
-
+ 
+As can be seen, activity  patterns are different between weekdays and weekend. Activity pattern on weekend clearly shows more volatility.
