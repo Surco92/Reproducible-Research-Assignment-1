@@ -65,6 +65,8 @@ median(step.sum,na.rm=TRUE)
 
 ```r
 hist(step.sum,seq(0,25000,1250),col="orange",xlab="Steps per day",main="")
+abline(v=mean(step.sum,na.rm=TRUE),col="red")
+legend(20000,12,"Mean",lty=1,col="red")
 ```
 
 ![plot of chunk unnamed-chunk-2](./assignment_1_files/figure-html/unnamed-chunk-2.png) 
@@ -156,13 +158,15 @@ median(step.sum3,na.rm=TRUE)
 
 ```r
 hist(step.sum3,seq(0,25000,1250),col="orange",xlab="Steps per day",main="")
+abline(v=mean(step.sum3,na.rm=TRUE),col="red")
+legend(20000,20,"Mean",lty=1,col="red")
 ```
 
 ![plot of chunk unnamed-chunk-4](./assignment_1_files/figure-html/unnamed-chunk-4.png) 
 
 
 In the original dataframe, there is 2304 NAs.
-After replacing NA with interval averages I computed that mean total number of steps is 1.0766 &times; 10<sup>4</sup> and median total number of steps is 1.0766 &times; 10<sup>4</sup>.
+After replacing NA with interval averages I computed that mean total number of steps is 1.0766 &times; 10<sup>4</sup> and median total number of steps is 1.0766 &times; 10<sup>4</sup>. This values are different than values computed from data with ommited NAs. Replacing NAs by  interval means shifted the median towards the mean. As can be seen from histogram, data are now more concetrated around the mean.  
 
 
 ###DIFFERENCES IN ACTIVITY PATTERNS BETWEEN WEEKDAYS AND WEEKENDS
