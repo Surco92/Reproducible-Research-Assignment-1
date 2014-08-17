@@ -1,0 +1,86 @@
+---
+title: 'REPRODUCIBLE RESEARCH: Assignment 1'
+output:
+  html_document:
+    keep_md: yes
+    self_contained: no
+---
+###LOADING THE DATA
+
+I downloaded the data and loaded them using R Studio. After that I checked the data format and summarized them. 
+```{r}
+activity <- read.csv("~/R/Repreducible research/repdata-data-activity/activity.csv")
+head(activity)
+summary(activity)
+```
+
+
+###MEAN AND MEDIAN TOTAL NUMBER OF STEPS TAKEN PER DAY
+
+Firstly, I created new dataset that contains only complete observations from original one. Then I computed total number steps of each day using `tapply()` function. Finally, I computed mean and median total number of steps per day and plotted the histogram.
+```{r}
+dat1<-activity[complete.cases(activity),]
+step.sum<-tapply(dat1$step,dat1$date,sum)
+mean(step.sum,na.rm=TRUE)
+median(step.sum,na.rm=TRUE)
+hist(step.sum,seq(0,25000,1250),col="orange",xlab="Steps per day",main="")
+```
+
+
+The mean is `r mean(step.sum,na.rm=TRUE) ` and median is `r median(step.sum,na.rm=TRUE)`
+
+
+###AVERAGE DAILY ACTIVITY PATTERN
+
+I used the modified dataset from previous question. The function `tapply()` was used to compute average steps for each interval. Subsequently, I created time series plot showing average steps by time interval. 
+```{r}
+int.mean<-tapply(dat1$step,as.factor(dat1$interval),mean)
+library(nnet)
+int.mean[which.is.max(int.mean)]
+plot(int.mean,type="l",ylab="Mean steps ",main="",xlab="Interval")
+```
+
+
+The highest average steps are `r int.mean[which.is.max(int.mean)]` in interval `r names(int.mean[which.is.max(int.mean)])`.
+
+
+###MISSING VALUES
+
+I decided to replace missing values by average steps of interval. As a first step, I calculated average steps for each interval. Then I converted the output to dataframe and merged it with original dataframe, matching the intervals.. After that, I easilly replaced NA with matched interval average. In the end, I computed mean, median and plotted the histogram. 
+ 
+```{r}
+dat2<-activity
+my.mean<-function(x) mean(x,na.rm=TRUE)
+int.mean2<-tapply(activity$step,as.factor(activity$interval),my.mean)
+df.int.mean2<-data.frame(interval=names(int.mean2),mean=as.vector(int.mean2))
+dat2<-merge(dat2,df.int.mean2,by="interval")
+dat2$steps[is.na(dat2$steps)]<-dat2$mean[is.na(dat2$steps)]
+step.sum3<-tapply(dat2$step,dat2$date,sum)
+mean(step.sum3,na.rm=TRUE)
+median(step.sum3,na.rm=TRUE)
+hist(step.sum3,seq(0,25000,1250),col="orange",xlab="Steps per day",main="")
+```
+
+
+In the original dataframe, there is `r nrow(activity)-sum(complete.cases(activity))` NAs.
+After replacing NA with interval averages I computed that mean total number of steps is `r mean(step.sum3,na.rm=TRUE)` and median total number of steps is `r median(step.sum3,na.rm=TRUE)`.
+
+
+###DIFFERENCES IN ACTIVITY PATTERNS BETWEEN WEEKDAYS AND WEEKENDS
+
+I used `strptime()` function to identify days. After that, I splitted the dataset to weekend and weekday datasets. Finally, interval means were computed and graph plotted for each dataset.
+
+```{r}
+Rdate2<-strptime(as.character(dat2$date),"%Y-%m-%d")
+dat3<-cbind(dat2,wd=as.factor(Rdate2$wday))
+levels(dat3$wd)<-c("weekend","weekday","weekday","weekday","weekday","weekday","weekend")
+dat.weekend<-dat3[dat3$wd=="weekend",]
+dat.weekday<-dat3[dat3$wd=="weekday",]
+int.mean.weekend<-tapply(dat.weekend$step,as.factor(dat.weekend$interval),mean)
+int.mean.weekday<-tapply(dat.weekday$step,as.factor(dat.weekday$interval),mean)
+plot(int.mean.weekend,type="l",ylab="Mean steps ",main="Weekends",xlab="Interval")
+plot(int.mean.weekday,type="l",ylab="Mean steps ",main="Weekdays",xlab="Interval")
+
+```
+
+

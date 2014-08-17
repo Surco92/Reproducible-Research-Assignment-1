@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta name="generator" content="pandoc" />
+
+
+
+<title>REPRODUCIBLE RESEARCH: Assignment 1</title>
+
+<script src="assignment_1_files/jquery-1.11.0/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="assignment_1_files/bootstrap-2.3.2/css/bootstrap.min.css" rel="stylesheet" />
+<link href="assignment_1_files/bootstrap-2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet" />
+<script src="assignment_1_files/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="assignment_1_files/highlight/default.css"
+      type="text/css" />
+<script src="assignment_1_files/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+<div class="container-fluid main-container">
+
+
+<div id="header">
+<h1 class="title">REPRODUCIBLE RESEARCH: Assignment 1</h1>
+</div>
+
+
+<div id="loading-the-data" class="section level3">
+<h3>LOADING THE DATA</h3>
+<p>I downloaded the data and loaded them using R Studio. After that I checked the data format and summarized them.</p>
+<pre class="r"><code>activity &lt;- read.csv(&quot;~/R/Repreducible research/repdata-data-activity/activity.csv&quot;)
+head(activity)</code></pre>
+<pre><code>##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25</code></pre>
+<pre class="r"><code>summary(activity)</code></pre>
+<pre><code>##      steps               date          interval   
+##  Min.   :  0.0   2012-10-01:  288   Min.   :   0  
+##  1st Qu.:  0.0   2012-10-02:  288   1st Qu.: 589  
+##  Median :  0.0   2012-10-03:  288   Median :1178  
+##  Mean   : 37.4   2012-10-04:  288   Mean   :1178  
+##  3rd Qu.: 12.0   2012-10-05:  288   3rd Qu.:1766  
+##  Max.   :806.0   2012-10-06:  288   Max.   :2355  
+##  NA&#39;s   :2304    (Other)   :15840</code></pre>
+</div>
+<div id="mean-and-median-total-number-of-steps-taken-per-day" class="section level3">
+<h3>MEAN AND MEDIAN TOTAL NUMBER OF STEPS TAKEN PER DAY</h3>
+<p>Firstly, I created new dataset that contains only complete observations from original one. Then I computed total number steps of each day using <code>tapply()</code> function. Finally, I computed mean and median total number of steps per day and plotted the histogram.</p>
+<pre class="r"><code>dat1&lt;-activity[complete.cases(activity),]
+step.sum&lt;-tapply(dat1$step,dat1$date,sum)</code></pre>
+<pre><code>## Warning: Name partially matched in data frame</code></pre>
+<pre class="r"><code>mean(step.sum,na.rm=TRUE)</code></pre>
+<pre><code>## [1] 10766</code></pre>
+<pre class="r"><code>median(step.sum,na.rm=TRUE)</code></pre>
+<pre><code>## [1] 10765</code></pre>
+<pre class="r"><code>hist(step.sum,seq(0,25000,1250),col=&quot;orange&quot;,xlab=&quot;Steps per day&quot;,main=&quot;&quot;)</code></pre>
+<p><img src="assignment_1_files/figure-html/unnamed-chunk-2.png" alt="plot of chunk unnamed-chunk-2" /></p>
+<p>The mean is 1.0766 × 10<sup>4</sup> and median is 10765</p>
+</div>
+<div id="average-daily-activity-pattern" class="section level3">
+<h3>AVERAGE DAILY ACTIVITY PATTERN</h3>
+<p>I used the modified dataset from previous question. The function <code>tapply()</code> was used to compute average steps for each interval. Subsequently, I created time series plot showing average steps by time interval.</p>
+<pre class="r"><code>int.mean&lt;-tapply(dat1$step,as.factor(dat1$interval),mean)</code></pre>
+<pre><code>## Warning: Name partially matched in data frame</code></pre>
+<pre class="r"><code>library(nnet)</code></pre>
+<pre><code>## Warning: package &#39;nnet&#39; was built under R version 3.1.1</code></pre>
+<pre class="r"><code>int.mean[which.is.max(int.mean)]</code></pre>
+<pre><code>##   835 
+## 206.2</code></pre>
+<pre class="r"><code>plot(int.mean,type=&quot;l&quot;,ylab=&quot;Mean steps &quot;,main=&quot;&quot;,xlab=&quot;Interval&quot;)</code></pre>
+<p><img src="assignment_1_files/figure-html/unnamed-chunk-3.png" alt="plot of chunk unnamed-chunk-3" /></p>
+<p>The highest average steps are 206.1698 in interval 835.</p>
+</div>
+<div id="missing-values" class="section level3">
+<h3>MISSING VALUES</h3>
+<p>I decided to replace missing values by average steps of interval. As a first step, I calculated average steps for each interval. Then I converted the output to dataframe and merged it with original dataframe, matching the intervals.. After that, I easilly replaced NA with matched interval average. In the end, I computed mean, median and plotted the histogram.</p>
+<pre class="r"><code>dat2&lt;-activity
+my.mean&lt;-function(x) mean(x,na.rm=TRUE)
+int.mean2&lt;-tapply(activity$step,as.factor(activity$interval),my.mean)</code></pre>
+<pre><code>## Warning: Name partially matched in data frame</code></pre>
+<pre class="r"><code>df.int.mean2&lt;-data.frame(interval=names(int.mean2),mean=as.vector(int.mean2))
+dat2&lt;-merge(dat2,df.int.mean2,by=&quot;interval&quot;)
+dat2$steps[is.na(dat2$steps)]&lt;-dat2$mean[is.na(dat2$steps)]
+step.sum3&lt;-tapply(dat2$step,dat2$date,sum)</code></pre>
+<pre><code>## Warning: Name partially matched in data frame</code></pre>
+<pre class="r"><code>mean(step.sum3,na.rm=TRUE)</code></pre>
+<pre><code>## [1] 10766</code></pre>
+<pre class="r"><code>median(step.sum3,na.rm=TRUE)</code></pre>
+<pre><code>## [1] 10766</code></pre>
+<pre class="r"><code>hist(step.sum3,seq(0,25000,1250),col=&quot;orange&quot;,xlab=&quot;Steps per day&quot;,main=&quot;&quot;)</code></pre>
+<p><img src="assignment_1_files/figure-html/unnamed-chunk-4.png" alt="plot of chunk unnamed-chunk-4" /></p>
+<p>In the original dataframe, there is 2304 NAs. After replacing NA with interval averages I computed that mean total number of steps is 1.0766 × 10<sup>4</sup> and median total number of steps is 1.0766 × 10<sup>4</sup>.</p>
+</div>
+<div id="differences-in-activity-patterns-between-weekdays-and-weekends" class="section level3">
+<h3>DIFFERENCES IN ACTIVITY PATTERNS BETWEEN WEEKDAYS AND WEEKENDS</h3>
+<p>I used <code>strptime()</code> function to identify days. After that, I splitted the dataset to weekend and weekday datasets. Finally, interval means were computed and graph plotted for each dataset.</p>
+<pre class="r"><code>Rdate2&lt;-strptime(as.character(dat2$date),&quot;%Y-%m-%d&quot;)
+dat3&lt;-cbind(dat2,wd=as.factor(Rdate2$wday))
+levels(dat3$wd)&lt;-c(&quot;weekend&quot;,&quot;weekday&quot;,&quot;weekday&quot;,&quot;weekday&quot;,&quot;weekday&quot;,&quot;weekday&quot;,&quot;weekend&quot;)
+dat.weekend&lt;-dat3[dat3$wd==&quot;weekend&quot;,]
+dat.weekday&lt;-dat3[dat3$wd==&quot;weekday&quot;,]
+int.mean.weekend&lt;-tapply(dat.weekend$step,as.factor(dat.weekend$interval),mean)</code></pre>
+<pre><code>## Warning: Name partially matched in data frame</code></pre>
+<pre class="r"><code>int.mean.weekday&lt;-tapply(dat.weekday$step,as.factor(dat.weekday$interval),mean)</code></pre>
+<pre><code>## Warning: Name partially matched in data frame</code></pre>
+<pre class="r"><code>plot(int.mean.weekend,type=&quot;l&quot;,ylab=&quot;Mean steps &quot;,main=&quot;Weekends&quot;,xlab=&quot;Interval&quot;)</code></pre>
+<p><img src="assignment_1_files/figure-html/unnamed-chunk-51.png" alt="plot of chunk unnamed-chunk-5" /></p>
+<pre class="r"><code>plot(int.mean.weekday,type=&quot;l&quot;,ylab=&quot;Mean steps &quot;,main=&quot;Weekdays&quot;,xlab=&quot;Interval&quot;)</code></pre>
+<p><img src="assignment_1_files/figure-html/unnamed-chunk-52.png" alt="plot of chunk unnamed-chunk-5" /></p>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with --self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
